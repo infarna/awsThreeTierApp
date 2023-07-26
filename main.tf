@@ -14,4 +14,5 @@ module "networking" {
   public_cidrs     = [for i in range(2, 255, 2) : cidrsubnet(local.vpc_cidr, 8, i)]
   max_subnets      = 20
   access_ip        = var.access_ip
+  security_groups  = local.security_groups
 }

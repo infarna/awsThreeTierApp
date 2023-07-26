@@ -1,6 +1,7 @@
+# ---- mtc networking/main.tf -----
+
 data "aws_availability_zones" "available" {}
 
-# ---- mtc networking/main.tf -----
 resource "random_integer" "random" {
   min = 1
   max = 100
@@ -87,14 +88,22 @@ resource "aws_route_table_association" "mtc_public_assoc" {
 }
 
 resource "aws_security_group" "mtc_sg" {
-  name        = "public_sg"
-  description = "Security Group for Public Access"
+  for_each    = var.security_groups
+  name        = each.value.name
+  description = each.value.description
   vpc_id      = aws_vpc.mtc_vpc.id
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.access_ip]
+
+
+
+  #public Security Group
+  dynamic "ingress" {
+    for_each = each.value.ingress
+    content {
+      from_port   = ingress.value.from
+      to_port     = ingress.value.to
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
   egress {
